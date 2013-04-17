@@ -1,4 +1,4 @@
-odinperltoolkit
+Odin's Perl Toolkit
 ===============
 
-Odin's Perl Tookit
+Some useful functions written in Perl.
