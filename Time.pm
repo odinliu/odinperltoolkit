@@ -21,6 +21,7 @@ package opt::Time;
 
 use strict;
 use Time::Local;
+use POSIX qw/strftime/;
 
 ##########################################################################
 # change yyyyMMddhhmmss format into unix timestamp
@@ -32,7 +33,7 @@ sub GetTimestamp {
     if ($time =~ m/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/) {
         my ($year, $month, $day, $hour, $minute, $second) = ($1, $2, $3, $4, $5,
             $6);
-        my $stamp = timelocal($second, $minute, $hour, $day, $month, $year);
+        my $stamp = timelocal($second, $minute, $hour, $day, $month-1, $year);
         return $stamp;
     }
     return 0;
@@ -41,7 +42,7 @@ sub GetTimestamp {
 ##########################################################################
 # get yyyyMMddhhmmss format date
 # @param[option] timestamp, if not pass, use current time
-# @return yyyyMMddhhmmss format
+# @return yyyyMMddhhmmss format string
 ##########################################################################
 sub GetPlainTime {
     my ($timestamp) = @_;
@@ -50,9 +51,22 @@ sub GetPlainTime {
     }
     my ($tmps, $tmpm, $tmph, $tmpd, $tmpn, $tmpy) = localtime($timestamp);
     $tmpy += 1900;
-    my $ts = sprintf("%.4d%.2d%.2d%.2d%.2d%.2d", $tmpy, $tmpn, $tmpd, $tmph,
+    my $ts = sprintf("%.4d%.2d%.2d%.2d%.2d%.2d", $tmpy, $tmpn+1, $tmpd, $tmph,
         $tmpm, $tmps);
     return $ts;
+}
+
+##########################################################################
+# get yyyy-MM-dd hh:mm:ss format date
+# @param[option] timestamp, if not pass, use current time
+# @return yyyy-MM-dd hh:mm:ss format string
+##########################################################################
+sub GetReadableTime {
+    my ($timestamp) = @_;
+    unless (defined $timestamp) {
+        $timestamp = time;
+    }
+    return strftime "%Y-%m-%d %H:%M:%S", localtime($timestamp);
 }
 
 1;

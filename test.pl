@@ -18,6 +18,29 @@
 use strict;
 use warnings;
 use opt::Time;
+use opt::Logger;
+
+# Test logs
+my $i = 0;
+&opt::Logger::Debug("this is a debug log[$i]");
+$i++;
+&opt::Logger::Trace("this is a trace log[$i]");
+$i++;
+&opt::Logger::Notice("this is a notice log[$i]");
+$i++;
+&opt::Logger::Warning("this is a warning log[$i]");
+$i++;
+&opt::Logger::Fatal("this is a fatal log[$i]");
+$i++;
+&opt::Logger::cDebug("this is a color debug log[$i]");
+$i++;
+&opt::Logger::cTrace("this is a color trace log[$i]");
+$i++;
+&opt::Logger::cNotice("this is a color notice log[$i]");
+$i++;
+&opt::Logger::cWarning("this is a color warning log[$i]");
+$i++;
+&opt::Logger::cFatal("this is a color fatal log[$i]");
 
 my $passed = 0;
 my $tested = 0;
@@ -34,4 +57,20 @@ if ($timestamp eq $result) {
     print STDOUT "Test GetPlainTime & GetTimestamp passed!\n";
 } else {
     die "Test GetPlainTime & GetTimestamp failed, pass[$passed/$tested]!\n";
+}
+
+# Test GetReadableTime
+$tested++;
+my $readableTime = &opt::Time::GetReadableTime($timestamp);
+if ($plainTime =~ m/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/) {
+    print STDOUT "Readable[$readableTime]\n";
+    if ($readableTime eq "$1-$2-$3 $4:$5:$6") {
+        $passed++;
+        print STDOUT "Test GetReadableTime passed!\n";
+    } else {
+        die "Test GetReadableTime failed, pass[$passed/$tested]!\n";
+    }
+} else {
+    # should never execute
+    die "Test GetReadableTime failed, pass[$passed/$tested]!\n";
 }
