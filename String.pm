@@ -53,4 +53,101 @@ sub Trim {
     return $str;
 }
 
+sub _BasicCutter {
+    my ($str) = @_;
+    my $left = "(:?\\(|\\[|\\{|（|【|『|《|〔)";
+    my $right = "(:?\\)|\\]|\\}|）|】|』|》|〕)";
+    my $ret = '';
+    my @terms = split /[- _,]+/, $str;
+    $ret .= shift @terms;
+    while (@terms > 0) {
+        my $term = shift @terms;
+        if ($term =~ m/^[a-z]+$/i or $term =~ m/$left/ or $term =~ m/$right/) {
+            $ret .= $term;
+        }
+    }
+    return $ret;
+}
+
+sub _FiltVersion {
+    my ($str) = @_;
+    if ($str =~ m/v\d/i) {
+        $str =~ s/v\d//ig;
+    }
+    if ($str =~ m/s[46]0/i) {
+        $sname =~ s/s[46]0//gi;
+    }
+    if ($sname =~ m/[23]d/i) {
+        $sname =~ s/[23]d//ig;
+    }
+    if ($sname =~ m/ext?/i) {
+        $sname =~ s/ext?//ig;
+    }
+    return $sname;
+}
+
+sub _FiltDesc {
+    my ($sname) = @_;
+    my $left = "(:?\\(|\\[|\\{|（|【|『|《|〔)";
+    my $right = "(:?\\)|\\]|\\}|）|】|』|》|〕)";
+    if ($sname =~ m/$left.*$right/) {
+        $sname =~ s/$left.*$right//g;
+    }
+    return $sname;
+}
+
+sub _KeepCharacter {
+    my ($str) = @_;
+    my $retstr = '';
+    my $i = 0;
+    while($i < length($str)) {
+        my $ch = substr($str, $i, 1);
+        if($ch =~ m/[a-zA-Z]/) {
+            $retstr .= $ch;
+        } elsif($ch =~ m/[\xB0-\xF7]/) {
+            my $ch1 = substr($str, $i+1, 1);
+            if($ch1 =~ m/[\xA1-\xFE]/) {
+                $retstr = $retstr . $ch . $ch1;
+            }
+            $i++;
+        } elsif($ch =~ m/[\x81-\xA0]/) {
+            my $ch1 = substr($str, $i+1, 1);
+            if($ch1 =~ m/[\x40-\xFE]/) {
+                $retstr = $retstr . $ch . $ch1;
+            }
+            $i++;
+        } elsif($ch =~ m/[\xAA-\xFE]/) {
+            my $ch1 = substr($str, $i+1, 1);
+            if($ch1 =~ m/[\x40-\xA0]/) {
+                $retstr = $retstr . $ch . $ch1;
+            }
+            $i++;
+        } elsif($ch =~ m/[\x81-\xFE]/) {
+            $i++;
+        }
+        $i++;
+    }
+    return $retstr;
+}
+
+sub _BadWordFilter {
+    my ($sname, $badword) = @_;
+    if ($sname =~ m/$badword/i) {
+        $sname =~ s/$badword//gi;
+    }
+    return $sname;
+}
+
+sub AppNameFilter {
+    my ($appName, $badword) = @_;
+    $sname = &_BasicCutter($sname);
+    $sname = &_FiltVersion($sname);
+    $sname = &_FiltDesc($sname);
+    $sname = &_KeepCharacter($sname);
+    if ($badword) {
+        $sname = &_BadWordFilter($sname, $badword);
+    }
+    return $sname;
+}
+
 1;
